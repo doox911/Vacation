@@ -1,9 +1,14 @@
+require('bootstrap');
+
 import Vue from 'vue'
+import App from './App';
+import router from './router';
+import store from './store';
 import vuetify from './plugins/vuetify'
 
-import ExampleComponent from './components/ExampleComponent';
-
 new Vue({
+    router,
+    store,
     vuetify,
-    render: h => h(ExampleComponent)
+    render: h => h(App)
 }).$mount('#app')
