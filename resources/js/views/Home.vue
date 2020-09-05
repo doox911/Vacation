@@ -1,9 +1,9 @@
 <template>
   <div class="home asasa">
     <span
-      @click="logout"
+      @click="help"
     >
-
+help
     </span>
   </div>
 </template>
@@ -14,6 +14,9 @@
   export default {
     name: 'Home',
     methods: {
+      help() {
+        console.log(this.$store.getters.isLogged)
+      }
     },
   }
 </script>

@@ -24,5 +24,8 @@
     components: {
       NavBar
     },
+    mounted() {
+      this.$store.commit('updateUserInStore');
+    }
   }
 </script>

@@ -27,20 +27,27 @@ export default {
   },
   mutations: {
     setUser(state, user) {
-      state.user = user
-      localStorage.setItem('user', JSON.stringify(user))
-      axios.defaults.headers.common.Authorization = `Bearer ${user.token}`
+      state.user = user;
+      localStorage.setItem('user', JSON.stringify(user));
+      axios.defaults.headers.common.Authorization = `Bearer ${user.token}`;
     },
 
     clearUser() {
-      localStorage.removeItem('user')
-      location.reload()
+      localStorage.removeItem('user');
+      location.reload();
+    },
+
+    updateUserInStore(state) {
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user) {
+        state.user = user;
+      }
     }
   },
   state: {
-    user: null
+    user: null,
   },
   getters: {
-    isLogged: state => !!state.user
+    isLogged: state => !!state.user,
   }
 }
