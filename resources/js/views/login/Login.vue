@@ -53,15 +53,23 @@
       return {
         email: '',
         password: ''
-      }
+      };
+    },
+    computed: {
+      isLogged () {
+        return this.$store.getters.isLogged;
+      },
     },
     methods: {
       async login () {
         await this.$store.dispatch('login', {
           email: this.email,
-          password: this.password
-        })
-        await this.$router.push({ name: 'Home' })
+          password: this.password,
+        });
+
+        if (this.isLogged) {
+          await this.$router.push({ name: 'Home' });
+        }
       }
     }
   }

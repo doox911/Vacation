@@ -309,6 +309,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       password: ''
     };
   },
+  computed: {
+    isLogged: function isLogged() {
+      return this.$store.getters.isLogged;
+    }
+  },
   methods: {
     login: function login() {
       var _this = this;
@@ -325,12 +330,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 2:
-                _context.next = 4;
+                if (!_this.isLogged) {
+                  _context.next = 5;
+                  break;
+                }
+
+                _context.next = 5;
                 return _this.$router.push({
                   name: 'Home'
                 });
 
-              case 4:
+              case 5:
               case "end":
                 return _context.stop();
             }

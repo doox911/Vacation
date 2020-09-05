@@ -22,9 +22,8 @@ class AuthController extends Controller {
 
       if (!Auth::attempt($credentials)) {
         return response()->json([
-          'status_code' => 500,
           'message' => 'Unauthorized'
-        ]);
+        ], 500);
       }
 
       $user = User::where('email', $request->email)->first();
@@ -36,17 +35,15 @@ class AuthController extends Controller {
       $tokenResult = $user->createToken('authToken')->plainTextToken;
 
       return response()->json([
-        'status_code' => 200,
         'access_token' => $tokenResult,
         'user' => $user,
         'token_type' => 'Bearer',
       ]);
     } catch (Exception $error) {
       return response()->json([
-        'status_code' => 500,
         'message' => 'Error in Login',
         'error' => $error,
-      ]);
+      ], 500);
     }
   }
 
