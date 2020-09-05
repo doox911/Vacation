@@ -1,11 +1,19 @@
 <template>
-  <div class="home">
+  <div class="home asasa">
+    <span
+      @click="logout"
+    >
 
+    </span>
   </div>
 </template>
 
 <script>
+  import axios from "axios";
+
   export default {
-    name: 'Home'
+    name: 'Home',
+    methods: {
+    },
   }
 </script>
