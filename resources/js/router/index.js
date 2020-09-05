@@ -29,7 +29,10 @@ const routes = [
   {
     path: '/vacation',
     name: 'Vacation',
-    component: () => import(/* webpackChunkName: "login" */ '../views/user/Vacation.vue')
+    meta: {
+      auth: true
+    },
+    component: () => import(/* webpackChunkName: "vacation" */ '../views/user/Vacation.vue')
   }
 ]
 

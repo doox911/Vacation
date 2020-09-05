@@ -59,7 +59,6 @@
     <v-main>
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
-
         <!-- If using vue-router -->
         <router-view />
       </v-container>
@@ -92,10 +91,10 @@
     },
     methods: {
       goHome () {
-        this.$router.push('/', () => {})
+        this.$router.push('/', () => {});
       },
       logout () {
-        this.$store.dispatch('logout')
+        this.$store.dispatch('logout');
       }
     },
   }
