@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-navigation-drawer
+      v-if="isLogged"
       v-model="drawer"
       app
       clipped
@@ -29,7 +30,10 @@
       clipped-left
       dense
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon
+        v-if="isLogged"
+        @click.stop="drawer = !drawer"
+      />
       <v-spacer />
       <template v-if="isLogged">
         <v-btn
