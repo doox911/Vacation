@@ -27,11 +27,11 @@ trait HasRolesAndPermissions {
     return false;
   }
 
-  protected function hasPermission($permission) {
+  public function hasPermission($permission) {
     return (bool)$this->permissions->where('slug', $permission->slug)->count();
   }
 
-  protected function hasPermissionTo($permission) {
+  public function hasPermissionTo($permission) {
     return $this->hasPermissionThroughRole($permission) || $this->hasPermission($permission);
   }
 

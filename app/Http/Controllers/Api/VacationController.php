@@ -99,6 +99,16 @@ class VacationController extends Controller {
    * @return void
    */
   public function update(Request $request, Vacation $vacation) {
+
+    /**
+     * Если отпуск зафиксирован
+     */
+    if ($vacation->readonly) {
+      return response()->json([
+        'updated' => false,
+      ]);
+    }
+
     $user = $request->user();
     $start = Carbon::parse($request->start);
     $end = Carbon::parse($request->end);
@@ -113,7 +123,7 @@ class VacationController extends Controller {
     }
 
     return response()->json([
-      'vacation' => $vacation->update($request->all()),
+      'updated' => $vacation->update($request->all()),
     ]);
   }
 
@@ -127,7 +137,11 @@ class VacationController extends Controller {
     //
   }
 
-  public function byUser(Request $request) {
+  public function fixed(Request $request, Vacation $vacation) {
+    if ($request->user()->hasRole('leader', 'admin')) {
+      $vacation->readonly = true;
 
+      $vacation->save();
+    }
   }
 }

@@ -13,6 +13,22 @@
           v-model="vacation.end"
         />
       </v-col>
+      <v-col>
+        <v-btn
+          v-if="!vacation.readonly"
+          text
+          color="success"
+          :loading="loading"
+          @click="fixed"
+        >
+          Зафиксировать
+        </v-btn>
+        <span
+          v-else
+        >
+          Зафиксированно
+        </span>
+      </v-col>
       <v-col cols="1">
         <v-btn
           icon
@@ -108,6 +124,14 @@
           this.snackbar_color = 'error';
           this.snackbar_text = 'Не верные даты отпуска';
         }
+      },
+
+      async fixed() {
+        this.loading = true;
+
+        await axios.put(`/api/vacation/fixed/${this.vacation.id}`);
+
+        this.loading = false;
       },
 
       /**

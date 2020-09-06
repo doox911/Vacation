@@ -38,10 +38,19 @@ class User extends Authenticatable {
     'email_verified_at' => 'datetime',
   ];
 
+  protected $appends = [
+    'can_edit',
+  ];
+
+
   /**
    * @return HasMany
    */
   public function vacations(): HasMany {
     return $this->hasMany(Vacation::class);
+  }
+
+  public function getCanEditAttribute() {
+    return $this->hasRole('leader', 'admin');
   }
 }

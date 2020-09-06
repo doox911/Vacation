@@ -41,7 +41,7 @@
               </v-toolbar>
               <v-card-text>
                 <edit-vacation
-                  v-if="selected_event.details && !selected_event.details.vacation.readonly"
+                  v-if="selected_event.details"
                   :vacation="selected_event.details.vacation"
                   @input="editedVacation"
                 />
@@ -130,7 +130,7 @@
         this.$refs.calendar.next()
       },
       showEvent({nativeEvent, event}) {
-        if (this.user.id === event.details.vacation.user_id) {
+        if (this.user.can_edit) {
           const open = () => {
             this.selected_event = event
             this.selected_element = nativeEvent.target
