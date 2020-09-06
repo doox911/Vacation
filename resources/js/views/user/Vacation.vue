@@ -2,7 +2,10 @@
   <v-container>
     <v-row>
       <v-col>
-        <add-vacation/>
+        <add-vacation
+          :loading="loading"
+          @input="addedVacation"
+        />
       </v-col>
       <v-col></v-col>
       <v-col></v-col>
@@ -16,10 +19,44 @@
             color="primary"
             :type="type"
             :events="events"
-            :names="names"
-            :colors="colors"
-            @change="updateRange"
+            :event-color="getEventColor"
+            @click:event="showEvent"
           ></v-calendar>
+          <v-menu
+            v-model="selected_open"
+            :close-on-content-click="false"
+            :activator="selected_element"
+            offset-x
+          >
+            <v-card
+              color="grey lighten-4"
+              min-width="350px"
+              flat
+            >
+              <v-toolbar
+                :color="selected_event.color"
+                dark
+              >
+                <v-toolbar-title v-html="selected_event.name"/>
+              </v-toolbar>
+              <v-card-text>
+                <edit-vacation
+                  v-if="selected_event.details && !selected_event.details.vacation.readonly"
+                  :vacation="selected_event.details.vacation"
+                  @input="editedVacation"
+                />
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  text
+                  color="secondary"
+                  @click="selected_open = false"
+                >
+                  Отмена
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-menu>
         </v-sheet>
       </v-col>
     </v-row>
@@ -32,11 +69,13 @@
    * Libs
    */
   import moment from 'moment';
+  import axios from 'axios';
 
   /**
    * Components
    */
   import AddVacation from '../../components/vacation/AddVacation';
+  import EditVacation from '../../components/vacation/EditVacation';
 
   /**
    * Управление отпуском
@@ -44,15 +83,25 @@
   export default {
     name: 'Vacation',
     components: {
-      AddVacation
+      AddVacation,
+      EditVacation,
     },
     data() {
       return {
         focus: '',
         type: 'month',
         events: [],
-        colors: ['success'],
-        names: ['Отпуск']
+        event_color: {
+          waiting: 'amber accent-4',
+          approved: 'green'
+        },
+        event_name_approved: 'Удачного отпуска',
+        event_name_waiting: 'Заявка на отпуск',
+        selected_open: false,
+        selected_element: null,
+        selected_event: {},
+
+        loading: false,
       };
     },
     computed: {
@@ -60,8 +109,8 @@
         return this.$store.getters.getUser;
       },
     },
-    mounted() {
-      // this.$refs.calendar.checkChange()
+    created() {
+      this.addedVacation();
     },
     methods: {
       viewDay({date}) {
@@ -81,55 +130,94 @@
         this.$refs.calendar.next()
       },
       showEvent({nativeEvent, event}) {
-        const open = () => {
-          this.selectedEvent = event
-          this.selectedElement = nativeEvent.target
-          setTimeout(() => this.selectedOpen = true, 10)
+        if (this.user.id === event.details.vacation.user_id) {
+          const open = () => {
+            this.selected_event = event
+            this.selected_element = nativeEvent.target
+            setTimeout(() => this.selected_open = true, 10)
+          }
+
+          if (this.selected_open) {
+            this.selected_open = false
+            setTimeout(open, 10)
+          } else {
+            open()
+          }
+
+          nativeEvent.stopPropagation()
+        }
+      },
+
+      allVacationApi() {
+        return axios.get('/api/vacation');
+      },
+
+      async appendEvents() {
+        try {
+          this.loading = true;
+
+          const events = [];
+          const vacations = (await this.allVacationApi()).data.vacations;
+
+          vacations.forEach(vacation => {
+            events.push(this.prepareVacationToRender(vacation));
+          });
+
+          this.events = events;
+        } catch (e) {
+          console.error(e);
+        } finally {
+          this.loading = false;
         }
 
-        if (this.selectedOpen) {
-          this.selectedOpen = false
-          setTimeout(open, 10)
-        } else {
-          open()
-        }
-
-        nativeEvent.stopPropagation()
+        return this;
       },
-      updateRange({start, end}) {
-        const events = []
 
-        const min = new Date(`${start.date}T00:00:00`)
-        const max = new Date(`${end.date}T23:59:59`)
-        // const days = (max.getTime() - min.getTime()) / 86400000
-        // const eventCount = this.rnd(days, days + 20)
+      /**
+       * @returns {Object} Vue Component
+       */
+      async addedVacation() {
+        await this.appendEvents();
 
-        // for (let i = 0; i < eventCount; i++) {
-        //   const allDay = this.rnd(0, 3) === 0
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime())
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000))
-        // const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000
-        // const second = new Date(first.getTime() + secondTimestamp)
-
-        events.push({
-          name: 'Отпуск',
-          start: new Date(),
-          end: moment().add(3, 'days').valueOf(),
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          // timed: 10,
-        })
-
-        events.push({
-          name: 'Отпуск',
-          start: moment().add(5, 'days').valueOf(),
-          end: moment().add(7, 'days').valueOf(),
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          // timed: 10,
-        })
-        // }
-
-        this.events = events
+        return this;
       },
+
+      /**
+       * @returns {Object} Vue Component
+       */
+      async editedVacation() {
+        await this.appendEvents();
+
+        return this;
+      },
+
+      prepareVacationToRender(vacation) {
+        return {
+          details: {
+            vacation: vacation,
+          },
+          name: this.getVacationName(vacation),
+          start: moment(vacation.start).valueOf(),
+          end: moment(vacation.end).valueOf(),
+          color: this.getVacationColor(vacation),
+        };
+      },
+
+      getVacationName(vacation) {
+        return vacation.readonly ? this.event_name_approved : this.event_name_waiting;
+      },
+
+      getVacationColor(vacation) {
+        return vacation.readonly ? this.event_color.approved : this.event_color.waiting;
+      },
+
+      /**
+       * Рандомное число из диапазона
+       *
+       * @param {number} a
+       * @param {number}b
+       * @returns {number}
+       */
       rnd(a, b) {
         return Math.floor((b - a + 1) * Math.random()) + a
       },

@@ -29,7 +29,7 @@ Route::post('logout/{user}', 'Api\AuthController@logout');
 |--------------------------------------------------------------------------
  */
 Route::group(['middleware' => 'auth:sanctum'], static function () {
-
+  Route::resource('vacation', 'Api\VacationController');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
